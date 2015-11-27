@@ -2,5 +2,5 @@
 
 export default {
   global: require('./styles/global'),
-  navbar: require('./styles/navbar')
+  listView: require('./styles/list-view')
 }

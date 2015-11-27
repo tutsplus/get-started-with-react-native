@@ -7,37 +7,35 @@ var {
   Text,
   StyleSheet,
   StatusBarIOS,
+  NavigatorIOS,
+  AlertIOS
 } = React;
+
+var MediaListView = require('./media-list-view');
+
+var styles = require('./styles');
+
 
 StatusBarIOS.setStyle('light-content');
 
 var iTunesBrowser = React.createClass({
   render: function() {
     return (
-      <View style={styles.global.mainContainer}>
-        <View style={styles.navbar.appearance}>
-          <View style={styles.navbar.button}></View>
-          <Text style={[styles.navbar.title,componentStyles.titleItalic,{
-            fontWeight: 'bold'
-          }]}>iTunesBrowser</Text>
-          <Text style={styles.navbar.button}>Search</Text>
-        </View>
-        <View style={styles.global.content}>
-          <Text>
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-          </Text>
-        </View>
-      </View>
+      <NavigatorIOS
+        style={styles.global.mainContainer}
+        barTintColor='#2A3744'
+        tintColor='#EFEFEF'
+        titleTextColor='#EFEFEF'
+        initialRoute={{
+          component: MediaListView,
+          title: 'iTunesBrowser',
+          rightButtonTitle: 'Search',
+          onRightButtonPress: () => AlertIOS.alert(
+            'Search', 'You pressed the search button.'
+          )
+        }}
+      />
     );
-  }
-});
-
-var styles = require('./styles');
-
-var componentStyles = StyleSheet.create({
-  titleItalic: {
-    fontStyle: 'italic',
-    fontWeight: 'normal'
   }
 });
 
