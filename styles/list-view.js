@@ -16,5 +16,8 @@ export default StyleSheet.create({
     fontSize: 15,
     flex: 1,
     height: 30,
+  },
+  spinner: {
+    width: 30
   }
 });
