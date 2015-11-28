@@ -7,8 +7,17 @@ var {
   TextInput,
   View
 } = React;
+var TimerMixin = require('react-timer-mixin');
 
 var styles = require('./styles');
+
+var API_URL = 'https://itunes.apple.com/search';
+
+var LOADING = {};
+
+var resultsCache = {
+  dataForQuery: {}
+};
 
 var SearchBar = React.createClass({
   render: function () {
@@ -21,7 +30,7 @@ var SearchBar = React.createClass({
           returnKeyType="search"
           enablesReturnKeyAutomatically={true}
           style={styles.listView.searchBarInput}
-          onEndEditing={this.props.onSearch}
+          onChange={this.props.onSearch}
         />
       </View>
     );
@@ -29,6 +38,47 @@ var SearchBar = React.createClass({
 });
 
 var MediaListView = React.createClass({
+  mixins: [TimerMixin],
+
+  timeoutID: (null: any),
+
+  _urlForQuery: function (query: string): string {
+    if (query.length > 2) {
+      return API_URL + '?media=movie&term=' + encodeURIComponent(query);
+    }
+  },
+
+  searchMedia: function (query: string) {
+    this.timeoutID = null;
+
+    var cachedResultsForQuery = resultsCache.dataForQuery[query];
+    if (cachedResultsForQuery) {
+      if (!LOADING[query]) {
+        AlertIOS.alert('Number of results', cachedResultsForQuery.length + ' cached results');
+      }
+    } else {
+      var queryURL = this._urlForQuery(query);
+
+      if (!queryURL) return;
+
+      LOADING[query] = true;
+      resultsCache.dataForQuery[query] = null;
+
+      fetch(queryURL)
+        .then((response) => response.json())
+        .catch((error) => {
+          LOADING[query] = false;
+          resultsCache.dataForQuery[query] = undefined;
+        })
+        .then((responseData) => {
+          LOADING[query] = false;
+          resultsCache.dataForQuery[query] = responseData.results;
+
+          AlertIOS.alert('Number of results', responseData.resultCount + ' results');
+        });
+    }
+  },
+
   render: function() {
     return (
       <View style={styles.global.content}>
@@ -36,7 +86,8 @@ var MediaListView = React.createClass({
           onSearch={(event) => {
             var searchString = event.nativeEvent.text;
 
-            AlertIOS.alert('Searching for...', searchString);
+            this.clearTimeout(this.timeoutID);
+            this.timeoutID = this.setTimeout(() => this.searchMedia(searchString), 250);
           }}
         />
         <Text>
