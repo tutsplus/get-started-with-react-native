@@ -3,12 +3,14 @@
 var React = require('react-native');
 var {
   ActivityIndicatorIOS,
-  AlertIOS,
+  ListView,
   Text,
   TextInput,
   View
 } = React;
 var TimerMixin = require('react-timer-mixin');
+
+var MediaCell = require('./media-cell');
 
 var styles = require('./styles');
 
@@ -51,14 +53,24 @@ var MediaListView = React.createClass({
     return {
       isLoading: false,
       query: '',
-      resultsData: []
+      resultsData: new ListView.DataSource({
+        rowHasChanged: (row1, row2) => row1 != row2
+      }),
     };
+  },
+
+  componentDidMount: function () {
+    this.searchMedia('mission impossible');
   },
 
   _urlForQuery: function (query: string): string {
     if (query.length > 2) {
       return API_URL + '?media=movie&term=' + encodeURIComponent(query);
     }
+  },
+
+  getDataSource: function (mediaItems: Array<any>): ListView.DataSource {
+    return this.state.resultsData.cloneWithRows(mediaItems);
   },
 
   searchMedia: function (query: string) {
@@ -71,7 +83,7 @@ var MediaListView = React.createClass({
       if (!LOADING[query]) {
         this.setState({
           isLoading: false,
-          resulsData: cachedResultsForQuery,
+          resultsData: this.getDataSource(cachedResultsForQuery),
         });
       } else {
         this.setState({
@@ -97,7 +109,8 @@ var MediaListView = React.createClass({
           resultsCache.dataForQuery[query] = undefined;
 
           this.setState({
-            isLoading: false
+            isLoading: false,
+            resultsData: this.getDataSource([])
           });
         })
         .then((responseData) => {
@@ -106,13 +119,37 @@ var MediaListView = React.createClass({
 
           this.setState({
             isLoading: false,
-            resultsData: resultsCache.dataForQuery[query]
+            resultsData: this.getDataSource(resultsCache.dataForQuery[query])
           })
         });
     }
   },
 
   render: function() {
+    var content = null;
+
+    if (this.state.resultsData.getRowCount() === 0) {
+      var text = '';
+
+      if (!this.state.isLoading && this.state.query) {
+        text = "No movies found for '" + this.state.query + "'.";
+      } else if (!this.state.isLoading) {
+        text = "No movies found.";
+      }
+
+      content = <View style={styles.listView.emptyList}>
+        <Text style={styles.listView.emptyListText}>{text}</Text>
+      </View>;
+    } else {
+      content = <ListView
+        dataSource={this.state.resultsData}
+        renderRow={this.renderRow}
+        renderSeparator={this.renderSeparator}
+        automaticallyAdjustContentInsets={false}
+        keyboardDismissMode='on-drag'
+      />;
+    }
+
     return (
       <View style={styles.global.content}>
         <SearchBar
@@ -124,10 +161,37 @@ var MediaListView = React.createClass({
             this.timeoutID = this.setTimeout(() => this.searchMedia(searchString), 250);
           }}
         />
-        <Text>
-          Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </Text>
+        <View style={[styles.listView.rowSeparator, { marginLeft: 0 }]} />
+        {content}
       </View>
+    );
+  },
+
+  renderSeparator: function (
+    sectionID: number | string,
+    rowID: number | string,
+    adjacentRowHighlighted: boolean
+  ) {
+    return (
+      <View
+        key={"SEP_" + sectionID + "_" + rowID}
+        style={[styles.listView.rowSeparator, adjacentRowHighlighted && styles.listView.rowSeparatorHighlighted]}
+      />
+    );
+  },
+
+  renderRow: function (
+    media: Object,
+    sectionID: number | string,
+    rowID: number | string,
+    highlightRowFunction: (sectionID: ?number | string, rowID: ?number | string) => void,
+  ) {
+    return (
+      <MediaCell
+        media={media}
+        onHighlight={() => highlightRowFunction(sectionID,rowID)}
+        onDeHighlight={() => highlightRowFunction(null,null)}
+      />
     );
   }
 });

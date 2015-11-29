@@ -19,5 +19,22 @@ export default StyleSheet.create({
   },
   spinner: {
     width: 30
+  },
+  rowSeparator: {
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    height: 1,
+    marginLeft: 4,
+  },
+  rowSeparatorHighlighted: {
+    opacity: 0.0
+  },
+  emptyList: {
+    flex: 1,
+    backgroundColor: '#FFF',
+    alignItems: 'center'
+  },
+  emptyListText: {
+    marginTop: 80,
+    color: '#999'
   }
 });
