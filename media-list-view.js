@@ -11,6 +11,7 @@ var {
 var TimerMixin = require('react-timer-mixin');
 
 var MediaCell = require('./media-cell');
+var MediaDetailView = require('./media-detail-view');
 
 var styles = require('./styles');
 
@@ -114,8 +115,11 @@ var MediaListView = React.createClass({
           });
         })
         .then((responseData) => {
+          return responseData.results.filter((e) => e.wrapperType !== 'collection');
+        })
+        .then((responseData) => {
           LOADING[query] = false;
-          resultsCache.dataForQuery[query] = responseData.results;
+          resultsCache.dataForQuery[query] = responseData;
 
           this.setState({
             isLoading: false,
@@ -189,10 +193,21 @@ var MediaListView = React.createClass({
     return (
       <MediaCell
         media={media}
+        onSelect={() => this.selectMediaItem(media)}
         onHighlight={() => highlightRowFunction(sectionID,rowID)}
         onDeHighlight={() => highlightRowFunction(null,null)}
       />
     );
+  },
+
+  selectMediaItem: function (mediaItem) {
+    this.props.navigator.push({
+      title: 'Media Details',
+      component: MediaDetailView,
+      passProps: {
+        mediaItem
+      }
+    });
   }
 });
 
