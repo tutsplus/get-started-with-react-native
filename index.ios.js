@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { AppRegistry, StyleSheet, Text, TextInput, TouchableHighlight, View } from 'react-native';
+import { AppRegistry, StyleSheet, Text, View } from 'react-native';
 
 import RunInfo from './components/run-info';
 import RunInfoNumeric from './components/run-info-numeric';
@@ -38,21 +38,8 @@ export default class GetStarted extends Component {
   render() {
     return (
       <View style={{flex: 1}}>
-        <TextInput
-          style={styles.textInput}
-          autoCapitalize="words"
-          placeholder="Type something..."
-          onChangeText={(text) => this.setState({ text })}
-          onBlur={() => this.setState({ text: this.state.text.toUpperCase() })}
-        />
-        <TouchableHighlight
-          onPress={() => this.setState({ confirmedText: this.state.text })}
-          onLongPress={() => this.setState({ confirmedText: this.state.text.toLowerCase() })}
-        >
-          <Text style={{fontSize: 16, backgroundColor: '#EEE', textAlign: 'center'}}>Press Me!</Text>
-        </TouchableHighlight>
         <Text style={{flex: 1, fontSize: 18}}>
-          {this.state.confirmedText}
+          NOT A MAP VIEW
         </Text>
         <View style={styles.infoWrapper}>
           <RunInfoNumeric title="Distance" unit="km"
