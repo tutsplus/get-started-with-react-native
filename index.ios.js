@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { AppRegistry, StyleSheet, Text, View } from 'react-native';
 
+import MapView from 'react-native-maps';
+
 import RunInfo from './components/run-info';
 import RunInfoNumeric from './components/run-info-numeric';
 
@@ -12,13 +14,18 @@ const styles = StyleSheet.create({
     right: 0,
     flexDirection: 'row',
     flex: 1
+  },
+  map: {
+    ...StyleSheet.absoluteFillObject
   }
 });
+
+let id = 0;
 
 export default class GetStarted extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { markers: [] };
 
     setInterval(() => {
       this.distanceInfo.setState({ value: Math.random() * 100 });
@@ -29,12 +36,41 @@ export default class GetStarted extends Component {
     }, 1000);
   }
 
+  addMarker(region) {
+    let now = (new Date).getTime();
+    if (this.state.lastAddedMarker > now - 5000) {
+      return;
+    }
+
+    this.setState({
+      markers: [
+        ...this.state.markers, {
+          coordinate: region,
+          key: id++
+        }
+      ],
+      lastAddedMarker: now
+    });
+  }
+
   render() {
     return (
       <View style={{flex: 1}}>
-        <Text style={{flex: 1, fontSize: 18}}>
-          NOT A MAP VIEW
-        </Text>
+        <MapView style={styles.map}
+          showsUserLocation
+          followsUserLocation
+          initialRegion={{
+            latitude: 37.33307,
+            longitude: -122.0324,
+            latitudeDelta: 0.02,
+            longitudeDelta: 0.02,
+          }}
+          onRegionChange={(region) => this.addMarker(region)}
+        >
+          {this.state.markers.map((marker) => (
+            <MapView.Marker coordinate={marker.coordinate} key={marker.key} />
+          ))}
+        </MapView>
         <View style={styles.infoWrapper}>
           <RunInfoNumeric title="Distance" unit="km"
             ref={(info) => this.distanceInfo = info}
