@@ -1,7 +1,12 @@
-import RunInfo from './run-info';
+import { RunInfo } from './run-info';
+import { connect } from 'react-redux';
 
-export default class RunInfoNumeric extends RunInfo {
+export class RunInfoNumeric extends RunInfo {
   formatValue() {
-    return [this.state.value.toFixed(2), this.props.unit].join(' ');
+    return [this.props.value.toFixed(2), this.props.unit].join(' ');
   }
 }
+
+export default connect((state, own) => {
+  return { value: state[own.type] };
+})(RunInfoNumeric);
